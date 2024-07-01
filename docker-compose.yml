@@ -8,14 +8,17 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3306:33060"
     volumes:
       - mysql-data:/var/lib/mysql
 
-  app:
-    build: ./beego
+  beego:
+    build:
+      context: ./beego
     ports:
       - "8080:8080"
+    volumes:
+      - ./beego:/app
     depends_on:
       - mysql
     environment:
@@ -24,12 +27,19 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-  react:
-      build: ./react
-      ports:
-        - "3000:3000"
-      depends_on:
-        - app
 
+
+  react:
+    container_name: react
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - beego
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork: {}
 volumes:
   mysql-data:

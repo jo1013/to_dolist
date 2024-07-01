@@ -1,5 +1,3 @@
-# Dockerfile
-
 # Go 환경 이미지를 사용합니다.
 FROM golang:1.22-alpine
 
@@ -10,12 +8,19 @@ WORKDIR /app
 ENV CGO_ENABLED=1
 RUN apk add --no-cache gcc musl-dev git
 
-# app 폴더 안에 있는 go.mod, go.sum 파일을 복사합니다.
+# app 폴더 안에 있는 go.mod 파일을 복사합니다.
 COPY app/go.mod app/go.sum ./
-RUN go mod tidy
+
+# 필요한 모듈을 다운로드하고 go.sum 파일을 업데이트합니다.
+RUN go mod download
 
 # 소스 코드 전체를 복사합니다. app 폴더 내의 모든 파일과 폴더를 컨테이너의 /app 디렉토리로 복사합니다.
 COPY app/ ./
+COPY main.go .
 
-# CMD에서 Go 빌드 및 실행 명령을 지정합니다.
-CMD go build -o main ./main.go && ./main
+# 애플리케이션 빌드
+RUN go mod tidy
+RUN go build -o main .
+
+# 서버 실행
+CMD ["./main"]
