@@ -1,4 +1,4 @@
-module github.com/jo1013/to_dolist
+module github.com/jo1013/to_dolist/beego
 
 go 1.22
 
