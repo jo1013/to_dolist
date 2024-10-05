@@ -1,26 +1,27 @@
 # Go 환경 이미지를 사용합니다.
 FROM golang:1.22-alpine
 
+# 필요한 패키지를 설치합니다.
+RUN apk add --no-cache git gcc musl-dev
+
 # 작업 디렉토리를 설정합니다.
 WORKDIR /app
 
-# CGO를 활성화하고 필요한 패키지(gcc, musl-dev, git)를 설치합니다.
-ENV CGO_ENABLED=1
-RUN apk add --no-cache gcc musl-dev git
+# 소스 코드를 복사합니다.
+COPY . .
 
-# app 폴더 안에 있는 go.mod 파일을 복사합니다.
-COPY app/go.mod app/go.sum ./
+# go.mod 파일이 없다면 초기화합니다.
+RUN if [ ! -f go.mod ]; then go mod init github.com/jo1013/to_dolist; fi
 
-# 필요한 모듈을 다운로드하고 go.sum 파일을 업데이트합니다.
-RUN go mod download
-
-# 소스 코드 전체를 복사합니다. app 폴더 내의 모든 파일과 폴더를 컨테이너의 /app 디렉토리로 복사합니다.
-COPY app/ ./
-COPY main.go .
-
-# 애플리케이션 빌드
+# 의존성을 다운로드하고 정리합니다.
 RUN go mod tidy
+
+# 애플리케이션을 빌드합니다.
+RUN go mod download
 RUN go build -o main .
+
+# CGO를 활성화합니다.
+ENV CGO_ENABLED=1
 
 # 서버 실행
 CMD ["./main"]
