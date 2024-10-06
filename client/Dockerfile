@@ -6,17 +6,16 @@ WORKDIR /app
 
 # 의존성 파일 복사 및 설치
 COPY package.json ./
-RUN npm install
 
 
 
 RUN npm install
-RUN npm install react-router-dom@6
+RUN npm install --save-dev typescript @types/react @types/react-dom
+
 RUN npm install typescript@latest ajv@^8 --save-dev
-RUN npm install @mui/material @emotion/react @emotion/styled
+RUN npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
 RUN npm install date-fns
 RUN npm install jwt-decode
-
 
 # 소스 코드 복사
 COPY . .
