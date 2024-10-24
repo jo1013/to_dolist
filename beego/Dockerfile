@@ -29,6 +29,7 @@ COPY --from=builder /app/main .
 
 # 실행 권한을 부여합니다.
 RUN chmod +x main
-
+RUN go build -o main .
+EXPOSE 8080
 # 서버 실행
 CMD ["./main"]
