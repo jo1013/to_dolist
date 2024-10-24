@@ -1,4 +1,3 @@
-// models/todo.go
 package models
 
 import (

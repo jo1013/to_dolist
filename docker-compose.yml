@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   mysql:
+    container_name: to_dolist-mysql-1
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -13,22 +14,31 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - mynetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      
   beego:
+    container_name: to_dolist-beego-1
     build:
       context: ./beego
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     volumes:
-      - ./beego:/app
+      - ./beego/conf:/app/conf  # 볼륨 마운트 수정
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     networks:
-        - mynetwork
+      - mynetwork
+
   react:
     container_name: react
     build: ./client
@@ -40,6 +50,8 @@ services:
       - mynetwork
 
 networks:
-  mynetwork: {}
+  mynetwork:
+    driver: bridge
+
 volumes:
   mysql-data:
