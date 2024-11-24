@@ -9,7 +9,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
@@ -43,7 +43,7 @@ services:
     container_name: react
     build: ./client
     ports:
-      - "3000:3000"
+      - "3005:3000"
     depends_on:
       - beego
     networks:

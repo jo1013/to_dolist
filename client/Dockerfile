@@ -1,5 +1,5 @@
 # 베이스 이미지 설정
-FROM node:14
+FROM node:18
 
 # 작업 디렉터리 설정
 WORKDIR /app
@@ -13,9 +13,11 @@ RUN npm install
 RUN npm install --save-dev typescript @types/react @types/react-dom
 
 RUN npm install typescript@latest ajv@^8 --save-dev
-RUN npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
-RUN npm install date-fns
-RUN npm install jwt-decode
+
+RUN npm install --legacy-peer-deps
+RUN npm install --save-dev typescript @types/react @types/react-dom --legacy-peer-deps
+RUN npm install typescript@4.9.5 ajv@^8 --save-dev --legacy-peer-deps
+RUN npm install @mui/material @emotion/react @emotion/styled @mui/icons-material --legacy-peer-deps
 
 # 소스 코드 복사
 COPY . .

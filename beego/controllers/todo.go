@@ -1,3 +1,4 @@
+// beego/controllers/todo.go
 package controllers
 
 import (
@@ -6,7 +7,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/astaxie/beego/orm"
+	"github.com/beego/beego/v2/client/orm" // orm도 v2로 변경
 	"github.com/jo1013/to_dolist/beego/models"
 )
 

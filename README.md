@@ -74,9 +74,9 @@ docker-compose up --build
 ```
 
 The application will be available at:
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3005
 - Backend API: http://localhost:8080
-- MySQL: localhost:3306
+- MySQL: localhost:3308
 
 ## API Endpoints
 
@@ -200,9 +200,9 @@ graph LR
         end
     end
 
-    A --> |Port 3000| G[Browser]
+    A --> |Port 3005| G[Browser]
     G --> |API Calls| C
-    C --> |Port 3306| E
+    C --> |Port 3308| E
     E --> F
 
 
@@ -210,9 +210,9 @@ graph LR
 Docker 컨테이너화된 환경에서의 배포 구조를 보여줍니다.
 
 Key Components:
-- **Frontend Container**: React 애플리케이션 (포트 3000)
+- **Frontend Container**: React 애플리케이션 (포트 3005)
 - **Backend Container**: Beego 서버 (포트 8080)
-- **Database Container**: MySQL 서버 (포트 3306)
+- **Database Container**: MySQL 서버 (포트 3308)
 
 ## License
 

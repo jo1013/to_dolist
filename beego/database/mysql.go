@@ -1,3 +1,4 @@
+// beego/database/mysql.go
 package database
 
 import (
@@ -5,12 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/astaxie/beego/orm"
+	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jo1013/to_dolist/beego/models" // models 패키지 import
 )
 
-func Init() {
-	time.Sleep(10 * time.Second) // MySQL 시작 대기
+func Init() error { // error 반환 추가
+	time.Sleep(10 * time.Second)        // MySQL 시작 대기
+	orm.RegisterModel(new(models.Todo)) // Todo 모델 등록
 
 	// 환경변수에서 값을 가져옴
 	user := os.Getenv("MYSQL_USER")
@@ -62,8 +65,8 @@ func Init() {
 		}
 
 		fmt.Println("Successfully connected to database!")
-		return
+		return nil // 성공 시 nil 반환
 	}
 
-	panic("Failed to connect to database after multiple attempts")
+	return fmt.Errorf("Failed to connect to database after multiple attempts") // 실패 시 error 반환
 }
