@@ -16,17 +16,73 @@ type TodoController struct {
 }
 
 // GetAll retrieves all todos
+
+// func (c *TodoController) GetAll() {
+// 	var todos []models.Todo
+// 	o := orm.NewOrm()
+// 	qs := o.QueryTable("todo")
+
+// 	// 완료 상태 필터 파라미터 확인
+// 	completed := c.GetString("completed")
+// 	priority := c.GetString("priority")
+
+// 	// 조건 추가
+// 	if completed != "" {
+// 		completedBool, _ := strconv.ParseBool(completed)
+// 		qs = qs.Filter("completed", completedBool)
+// 	}
+
+// 	if priority != "" {
+// 		qs = qs.Filter("priority", priority)
+// 	}
+
+// 	// 우선순위 순으로 정렬
+// 	qs = qs.OrderBy("CASE priority " +
+// 		"WHEN 'HIGH' THEN 1 " +
+// 		"WHEN 'MEDIUM' THEN 2 " +
+// 		"WHEN 'LOW' THEN 3 END")
+
+//		_, err := qs.All(&todos)
+//		if err != nil {
+//			c.Data["json"] = map[string]interface{}{
+//				"error": err.Error(),
+//			}
+//		} else {
+//			c.Data["json"] = todos
+//		}
+//		c.ServeJSON()
+//	}
 func (c *TodoController) GetAll() {
 	var todos []models.Todo
 	o := orm.NewOrm()
-	_, err := o.QueryTable("todo").All(&todos)
+	qs := o.QueryTable("todo")
+
+	// 완료 상태 필터링
+	completed := c.GetString("completed")
+	if completed != "" {
+		completedBool, err := strconv.ParseBool(completed)
+		if err == nil {
+			qs = qs.Filter("completed", completedBool)
+		}
+	}
+
+	// 우선순위 필터링
+	priority := c.GetString("priority")
+	if priority != "" {
+		qs = qs.Filter("priority", priority)
+	}
+
+	// 우선순위 순으로 정렬
+	_, err := qs.OrderBy("-priority").All(&todos)
 	if err != nil {
 		c.Data["json"] = map[string]interface{}{
 			"error": err.Error(),
 		}
-	} else {
-		c.Data["json"] = todos
+		c.ServeJSON()
+		return
 	}
+
+	c.Data["json"] = todos
 	c.ServeJSON()
 }
 
@@ -67,8 +123,6 @@ func (c *TodoController) Post() {
 		return
 	}
 
-	fmt.Printf("Raw body: %s\n", string(body))
-
 	// JSON 파싱
 	var todo models.Todo
 	err = json.Unmarshal(body, &todo)
@@ -89,6 +143,11 @@ func (c *TodoController) Post() {
 		}
 		c.ServeJSON()
 		return
+	}
+
+	// priority 기본값 설정
+	if todo.Priority == "" {
+		todo.Priority = "MEDIUM"
 	}
 
 	// 데이터베이스에 저장

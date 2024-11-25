@@ -15,7 +15,7 @@ func init() {
 
 	// CORS 설정
 	web.InsertFilter("*", web.BeforeRouter, func(ctx *context.Context) {
-		ctx.Output.Header("Access-Control-Allow-Origin", "http://localhost:3005")
+		ctx.Output.Header("Access-Control-Allow-Origin", "http://210.96.118.168:3005")
 		ctx.Output.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
 		ctx.Output.Header("Access-Control-Allow-Headers", "Origin,Content-Type,Accept,Authorization")
 		ctx.Output.Header("Access-Control-Allow-Credentials", "true")

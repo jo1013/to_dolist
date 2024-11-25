@@ -9,7 +9,7 @@ type BaseController struct {
 }
 
 func (c *BaseController) Prepare() {
-	c.Ctx.Output.Header("Access-Control-Allow-Origin", "http://localhost:3005")
+	c.Ctx.Output.Header("Access-Control-Allow-Origin", "http://210.96.118.168:3005")
 	c.Ctx.Output.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
 	c.Ctx.Output.Header("Access-Control-Allow-Headers", "Origin,Content-Type")
 	c.Ctx.Output.Header("Access-Control-Allow-Credentials", "true")

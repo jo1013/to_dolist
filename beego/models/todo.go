@@ -9,6 +9,7 @@ type Todo struct {
 	Title       string `json:"title" orm:"size(100)"`
 	Description string `json:"description" orm:"type(text)"`
 	Completed   bool   `json:"completed" orm:"default(false)"`
+	Priority    string `json:"priority" orm:"column(priority);default(MEDIUM)"`
 }
 
 func init() {

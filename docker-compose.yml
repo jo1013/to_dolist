@@ -44,6 +44,8 @@ services:
     build: ./client
     ports:
       - "3005:3000"
+    env_file:
+      - .env
     depends_on:
       - beego
     networks:

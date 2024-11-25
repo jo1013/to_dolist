@@ -1,5 +1,5 @@
 //App.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTodoApp } from './useTodoApp';
 import { 
   Container, 
@@ -13,14 +13,18 @@ import {
   IconButton, 
   Checkbox,
   Paper,
-  Box
+  Box,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import { Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const theme = createTheme();
-
-const API_BASE_URL = 'http://localhost:8080/api';
 
 const App: React.FC = () => {
   const {
@@ -28,63 +32,25 @@ const App: React.FC = () => {
     newTodo,
     editingId,
     editText,
+    filters,
+    newTodoPriority,
     setNewTodo,
     setEditText,
+    setFilters,
+    setNewTodoPriority,
     addTodo,
     deleteTodo,
     toggleComplete,
+    updatePriority,
     startEdit,
     saveEdit,
-    setEditingId,
-    setTodos,
+    fetchTodos,
   } = useTodoApp();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    fetch(`${API_BASE_URL}/todos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title: newTodo, completed: false }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        addTodo(e);
-      })
-      .catch(error => console.error('Error adding todo:', error));
-  };
-
-  const handleDelete = (id: number) => {
-    fetch(`${API_BASE_URL}/todos/${id}`, {
-      method: 'DELETE',
-    })
-      .then(() => {
-        deleteTodo(id);
-      })
-      .catch(error => console.error('Error deleting todo:', error));
-  };
-
-  const handleToggleComplete = (id: number, completed: boolean) => {
-    fetch(`${API_BASE_URL}/todos/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ completed: !completed }),
-    })
-      .then(() => {
-        toggleComplete(id, completed);
-      })
-      .catch(error => console.error('Error updating todo:', error));
-  };
-
-  React.useEffect(() => {
-    fetch(`${API_BASE_URL}/todos`)
-      .then(response => response.json())
-      .then(data => setTodos(data))
-      .catch(error => console.error('Error fetching todos:', error));
-  }, [setTodos]);
+  // 컴포넌트 마운트시와 필터 변경시 todos 가져오기
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos, filters]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -93,43 +59,120 @@ const App: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Todo List
           </Typography>
+
+          {/* 필터 컨트롤 */}
           <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-            <form onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={newTodo}
-                onChange={(e) => setNewTodo(e.target.value)}
-                placeholder="Add new todo"
-                sx={{ mb: 2 }}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={filters.showCompleted}
+                    onChange={(e) => setFilters({...filters, showCompleted: e.target.checked})}
+                  />
+                }
+                label="Show Completed"
               />
+              <FormControl fullWidth size="small">
+                <InputLabel>Priority Filter</InputLabel>
+                <Select
+                  value={filters.priority}
+                  label="Priority Filter"
+                  onChange={(e) => setFilters({...filters, priority: e.target.value})}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="HIGH">High</MenuItem>
+                  <MenuItem value="MEDIUM">Medium</MenuItem>
+                  <MenuItem value="LOW">Low</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Paper>
+
+          {/* 새 Todo 입력 폼 */}
+          <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+            <form onSubmit={addTodo}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={newTodo}
+                  onChange={(e) => setNewTodo(e.target.value)}
+                  placeholder="Add new todo"
+                />
+                <FormControl sx={{ minWidth: 120 }} size="small">
+                  <InputLabel>Priority</InputLabel>
+                  <Select
+                    value={newTodoPriority}
+                    label="Priority"
+                    onChange={(e) => setNewTodoPriority(e.target.value as 'HIGH' | 'MEDIUM' | 'LOW')}
+                  >
+                    <MenuItem value="HIGH">High</MenuItem>
+                    <MenuItem value="MEDIUM">Medium</MenuItem>
+                    <MenuItem value="LOW">Low</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <Button type="submit" variant="contained" color="primary" fullWidth>
                 Add Todo
               </Button>
             </form>
           </Paper>
+
+          {/* Todo 리스트 */}
           <List>
             {todos.map((todo) => (
-              <ListItem key={todo.id} sx={{ mb: 1 }}>
+              <ListItem 
+                key={todo.id} 
+                sx={{ 
+                  mb: 1,
+                  bgcolor: 'background.paper',
+                  borderLeft: 6,
+                  borderColor: todo.priority === 'HIGH' 
+                    ? 'error.main' 
+                    : todo.priority === 'MEDIUM' 
+                    ? 'warning.main' 
+                    : 'success.main'
+                }}
+              >
                 <Checkbox
                   checked={todo.completed}
-                  onChange={() => handleToggleComplete(todo.id, todo.completed)}
+                  onChange={() => toggleComplete(todo.id, todo.completed)}
                 />
                 {editingId === todo.id ? (
                   <TextField
                     fullWidth
+                    size="small"
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
                     onBlur={saveEdit}
+                    onKeyPress={(e) => e.key === 'Enter' && saveEdit()}
                   />
                 ) : (
-                  <ListItemText primary={todo.title} />
+                  <ListItemText 
+                    primary={todo.title}
+                    sx={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+                  />
                 )}
                 <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={() => startEdit(todo.id, todo.title)}>
+                  <FormControl size="small" sx={{ mr: 1, minWidth: 100 }}>
+                    <Select
+                      value={todo.priority}
+                      onChange={(e) => updatePriority(todo.id, e.target.value as 'HIGH' | 'MEDIUM' | 'LOW')}
+                    >
+                      <MenuItem value="HIGH">High</MenuItem>
+                      <MenuItem value="MEDIUM">Medium</MenuItem>
+                      <MenuItem value="LOW">Low</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <IconButton 
+                    edge="end" 
+                    onClick={() => startEdit(todo.id, todo.title)}
+                    sx={{ mr: 1 }}
+                  >
                     <EditIcon />
                   </IconButton>
-                  <IconButton edge="end" onClick={() => handleDelete(todo.id)}>
+                  <IconButton edge="end" onClick={() => deleteTodo(todo.id)}>
                     <DeleteIcon />
                   </IconButton>
                 </ListItemSecondaryAction>
